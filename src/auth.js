@@ -1,3 +1,5 @@
+"use strict";
+
 const fetch = (...args) =>
     import("node-fetch").then(({ default: fetch }) => fetch(...args));
 const { search, getMac256Hash } = require("./util");
@@ -39,7 +41,7 @@ module.exports = {
                         'Content-Type': 'application/x-www-form-urlencoded',
                         'Cookie': `uaid=${uaid}; cltm=cf:ReservedFlight33$2cReservedFligh; MSPRequ=${msprequ}; MSCC=${mscc}; MSPOK=${mspok}; OParams=${oparams}; MSPRequ=${msprequ}; MSPOK=${mspok}; CkTst=G${Date.now()}`,
                     },
-                    body: `login=${encodeURIComponent("josht8160@gmail.com")}&passwd=${encodeURIComponent("1r4ce3y^")}&PPFT=${encodeURIComponent(ppft)}&loginoptions=3`,
+                    body: `login=${encodeURIComponent(this.username)}&passwd=${encodeURIComponent(this.password)}&PPFT=${encodeURIComponent(ppft)}&loginoptions=3`,
                     method: "POST",
                 }
             ).then(console.log("16.7%"))
@@ -140,14 +142,29 @@ module.exports = {
                 res = await fetch(l_new, getInfo()).then(console.log("100%"))
             }
             let tokencapsule = res.headers.get("set-registrationtoken") + ";";
-            return {
-                
-                msgHost: "https"+await search(/https(.*?)\.com/gm, res.headers.get("location"))+".com",
+            let location = await search(/https(.*?)\.com/gm, res.headers.get("location"));
+            let returnVals = {
+                msgHost: "https"+location+".com",
                 regToken: await search(/registrationToken=(.*?);/gm, tokencapsule),
                 r_expiry: await search(/expires=(.*?);/gm, tokencapsule),
                 skypeToken: token,
                 s_expiry: expiry
             };
+            if (!location) {
+                res = await fetch("https://client-s.gateway.messenger.live.com/v1/users/ME/endpoints", {
+                    "headers": {
+                        "authentication": token,
+                        "content-type": "application/json",
+                        "registrationtoken": `registrationToken=${returnVals.regToken}; expires=${returnVals.r_expiry}`,
+                    },
+                    "body": "{}",
+                    "method": "POST"
+                });
+                location = await search(/https(.*?)\.com/gm, res.headers.get("location"));
+                returnVals.msgHost = "https"+location+".com";
+            }
+            console.log(returnVals.msgHost)
+            return returnVals;
         }
 
         async connect (user, pass){

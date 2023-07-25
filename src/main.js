@@ -1,3 +1,5 @@
+"use strict"
+
 const fetch = (...args) =>
     import("node-fetch").then(({ default: fetch }) => fetch(...args));
 require("dotenv").config();
@@ -10,13 +12,15 @@ module.exports = {
         constructor (){
             super();
             this.auth = new Connection();
-            this.conv = null;
+            this.convos;
         }
         async login(user, pass){
             this.auth.connect(user, pass).then(()=>{
-                this.conv = new Convos(this.auth.authInfo());
+                global.credentials = this.auth;
+                this.convos = new Convos();
                 this.emit('ready');
             })
         }
+        async 
     }
 }
