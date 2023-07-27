@@ -42,6 +42,7 @@ class Message {
             }
         );
         console.log("Edit -", res.statusText, res.status);
+        return this;
     }
 
     async delete() {
@@ -56,6 +57,7 @@ class Message {
             }
         );
         console.log("Delete -", res.statusText, res.status);
+        return this;
     }
 }
 
